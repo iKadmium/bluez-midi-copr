@@ -1,64 +1,49 @@
 #!/bin/bash
 set -e
 
-echo "Getting available COPR chroots..."
+# Check for CI mode
+CI_MODE=false
+if [ "$1" = "--ci" ] || [ "$1" = "-c" ]; then
+    CI_MODE=true
+fi
+
+if [ "$CI_MODE" = false ]; then
+    echo "Getting available COPR chroots..."
+fi
 
 # Function to get available chroots from COPR API
 get_fedora_chroots() {
-    echo "Querying COPR API for available Fedora chroots..." >&2
+    if [ "$CI_MODE" = false ]; then
+        echo "Querying COPR API for available Fedora chroots..." >&2
+    fi
     
     # Get chroots from COPR API with better error handling
     API_RESPONSE=$(curl -s "https://copr.fedorainfracloud.org/api_3/mock-chroots/list" 2>/dev/null)
     
     if [ $? -ne 0 ] || [ -z "$API_RESPONSE" ]; then
-        echo "Failed to connect to COPR API, using fallback list..." >&2
-        echo "fedora-40-x86_64"
-        echo "fedora-40-aarch64"
-        echo "fedora-41-x86_64"
-        echo "fedora-41-aarch64" 
-        echo "fedora-42-x86_64"
-        echo "fedora-42-aarch64"
-        echo "fedora-rawhide-x86_64"
-        echo "fedora-rawhide-aarch64"
+        if [ "$CI_MODE" = false ]; then
+            echo "Failed to connect to COPR API" >&2
+        fi
         return
     fi
     
     # Check if jq can parse the response
     if ! echo "$API_RESPONSE" | jq . >/dev/null 2>&1; then
-        echo "Invalid JSON response from COPR API, using fallback list..." >&2
-        echo "fedora-40-x86_64"
-        echo "fedora-40-aarch64"
-        echo "fedora-41-x86_64"
-        echo "fedora-41-aarch64" 
-        echo "fedora-42-x86_64"
-        echo "fedora-42-aarch64"
-        echo "fedora-rawhide-x86_64"
-        echo "fedora-rawhide-aarch64"
+        if [ "$CI_MODE" = false ]; then
+            echo "Invalid JSON response from COPR API" >&2
+        fi
         return
     fi
     
     # Extract Fedora chroots (keys that match the pattern for x86_64 and aarch64)
-    CHROOTS=$(echo "$API_RESPONSE" | jq -r 'keys[] | select(test("^fedora-[0-9]+-(x86_64|aarch64)$"))' | sort -V)
+    CHROOTS=$(echo "$API_RESPONSE" | jq -r 'keys[] | select(test("^fedora-([0-9]|rawhide)+-(x86_64|aarch64)$"))' | sort -V)
     
     if [ -z "$CHROOTS" ]; then
-        echo "No Fedora chroots found in API response, using fallback list..." >&2
-        echo "fedora-40-x86_64"
-        echo "fedora-40-aarch64"
-        echo "fedora-41-x86_64"
-        echo "fedora-41-aarch64" 
-        echo "fedora-42-x86_64"
-        echo "fedora-42-aarch64"
-        echo "fedora-rawhide-x86_64"
-        echo "fedora-rawhide-aarch64"
+        if [ "$CI_MODE" = false ]; then
+            echo "No Fedora chroots found in API response" >&2
+        fi
     else
         echo "$CHROOTS"
-        # Add rawhide if it exists in the API
-        if echo "$API_RESPONSE" | jq -r 'keys[]' | grep -q "fedora-rawhide-x86_64"; then
-            echo "fedora-rawhide-x86_64"
-        fi
-        if echo "$API_RESPONSE" | jq -r 'keys[]' | grep -q "fedora-rawhide-aarch64"; then
-            echo "fedora-rawhide-aarch64"
-        fi
     fi
 }
 
@@ -71,6 +56,12 @@ generate_chroot_args() {
         fi
     done
 }
+
+# In CI mode, just output the chroots and exit
+if [ "$CI_MODE" = true ]; then
+    get_fedora_chroots
+    exit 0
+fi
 
 echo "Available Fedora chroots:"
 echo "========================="
@@ -100,3 +91,9 @@ echo "copr-cli modify bluez-midi $CHROOT_ARGS"
 echo ""
 echo "# Submit build for all configured chroots:"
 echo "copr-cli build bluez-midi *.spec --sources *.tar.*"
+
+echo ""
+echo "# Usage:"
+echo "# $0          - Show detailed output with suggestions"
+echo "# $0 --ci     - CI mode: only output chroots (one per line)"
+echo "# $0 -c       - Short form of --ci"

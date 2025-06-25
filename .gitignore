@@ -1,11 +1,25 @@
-work/
-copr-submission*/
+# Build artifacts
+/work/
+copr-submission-*/
+automation-state/
+/spec/
 
 # RPM build artifacts
 *.rpm
 *.src.rpm
 rpmbuild/
 .rpmmacros
+
+# Docker build context
+.dockerignore
+
+# Temporary files
+*.tmp
+*.log
+
+# COPR configuration (contains secrets)
+.config/copr
+~/.config/copr
 
 # Source tarballs
 *.tar.*

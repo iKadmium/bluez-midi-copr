@@ -1,28 +1,45 @@
-# BlueZ MIDI COPR Development Environment
+# BlueZ MIDI COPR Automation
 
-This repository contains the development environment and packaging files for building a COPR (Community Build System) package of BlueZ with enhanced MIDI support for Fedora.
+This repository provides automated building and distribution of BlueZ with enhanced MIDI support for Fedora via COPR (Community Build System).
 
 ## Features
 
-- **Dev Container**: Complete Fedora-based development environment
+- **Automated COPR Management**: Automatically detects new Fedora versions and BlueZ updates
+- **Docker-based Builds**: Works on any platform with Docker (including GitHub Actions)
 - **Enhanced MIDI Support**: BlueZ configured with experimental MIDI features
-- **COPR Integration**: Ready-to-use COPR packaging and build scripts
 - **PipeWire Integration**: Support for modern audio systems
+- **CI/CD Ready**: GitHub Actions workflow for automated builds
 
-## Getting Started
+## Quick Start
 
 ### Prerequisites
 
 - Docker or Podman
-- VS Code with Dev Containers extension
+- COPR account and API token (for submissions)
 
-### Setup
+### Local Usage
 
-1. **Open in Dev Container**:
+1. **Clone and build**:
+   ```bash
+   git clone <repository-url>
+   cd bluez-midi-copr
+   chmod +x docker-wrapper.sh
+   ```
 
-   - Open this repository in VS Code
-   - Click "Reopen in Container" when prompted
-   - Or use Command Palette: `Dev Containers: Reopen in Container`
+2. **Update spec for a Fedora version**:
+   ```bash
+   ./docker-wrapper.sh update-spec fedora-42
+   ```
+
+3. **Prepare COPR submission**:
+   ```bash
+   ./docker-wrapper.sh prepare-submission fedora-42
+   ```
+
+4. **Run full automation**:
+   ```bash
+   ./docker-wrapper.sh automation
+   ```
 
 2. **Configure COPR**:
 
@@ -140,3 +157,61 @@ This BlueZ build includes:
 - [RPM Packaging Guide](https://rpm-packaging-guide.github.io/)
 - [BlueZ Documentation](http://www.bluez.org/documentation/)
 - [Fedora Packaging Guidelines](https://docs.fedoraproject.org/en-US/packaging-guidelines/)
+
+### GitHub Actions Setup
+
+For automated builds in GitHub Actions:
+
+1. **Set up COPR credentials**:
+   - Go to your repository Settings → Secrets and variables → Actions
+   - Add these secrets:
+     - `COPR_LOGIN`: Your COPR login name
+     - `COPR_TOKEN`: Your COPR API token
+   - Add this variable:
+     - `COPR_OWNER`: Your COPR username (optional, defaults to repository owner)
+
+2. **Configure the workflow**:
+   - The workflow runs daily at 6 AM UTC
+   - Manual runs can be triggered from the Actions tab
+   - Specific Fedora versions can be built manually
+
+3. **Monitor builds**:
+   - Check the Actions tab for build status
+   - Artifacts include generated spec files and submission directories
+   - Build logs show detailed progress
+
+## Architecture
+
+### Docker-based Approach
+
+The system uses Docker to provide a consistent Fedora environment for:
+- Downloading Fedora source RPMs
+- Extracting and modifying spec files  
+- Preparing COPR submissions
+
+This approach works reliably on Ubuntu GitHub runners while maintaining compatibility with Fedora packaging tools.
+
+### Automation Logic
+
+The automation script (`bluez-midi-automation.sh`) implements:
+
+1. **Version Detection**: Checks for new Fedora versions via COPR API
+2. **COPR Management**: Automatically adds new Fedora versions to the COPR project
+3. **Update Checking**: Monitors BlueZ package versions in Fedora repositories
+4. **Build Submission**: Automatically builds and submits updates when available
+5. **State Tracking**: Maintains state to avoid duplicate builds
+
+## File Structure
+
+```
+├── Dockerfile                    # Fedora-based build environment
+├── docker-wrapper.sh            # Docker command wrapper  
+├── bluez-midi-automation.sh      # Main automation logic
+├── update-bluez-spec.sh          # Spec file modification
+├── prepare-copr-submission.sh    # COPR submission preparation
+├── get-copr-chroots.sh          # Available chroots query
+├── config.env                   # Configuration settings
+└── .github/workflows/           # GitHub Actions automation
+```
+
+## Manual Operations

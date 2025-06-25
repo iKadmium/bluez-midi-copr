@@ -19,7 +19,7 @@
         }
     },
     "mounts": [
-        "source=${localEnv:HOME}/.config/copr,target=/home/vscode/.config/copr,type=bind,consistency=cached"
+        //"source=${localEnv:HOME}/.config/copr,target=/home/vscode/.config/copr,type=bind,consistency=cached"
     ],
     "remoteUser": "vscode",
     "forwardPorts": [],
