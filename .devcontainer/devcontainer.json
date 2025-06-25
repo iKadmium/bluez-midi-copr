@@ -1,0 +1,28 @@
+{
+    "name": "BlueZ MIDI COPR Development",
+    "image": "docker.io/fedora:latest",
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "username": "vscode",
+            "userUid": "1000",
+            "userGid": "1000"
+        }
+    },
+    //"postCreateCommand": "bash .devcontainer/setup.sh",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.makefile-tools",
+                "redhat.vscode-yaml",
+                "ms-vscode.hexeditor"
+            ]
+        }
+    },
+    "mounts": [
+        "source=${localEnv:HOME}/.config/copr,target=/home/vscode/.config/copr,type=bind,consistency=cached"
+    ],
+    "remoteUser": "vscode",
+    "forwardPorts": [],
+    "workspaceFolder": "/workspace",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind"
+}

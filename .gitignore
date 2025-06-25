@@ -1,0 +1,42 @@
+work/
+copr-submission*/
+
+# RPM build artifacts
+*.rpm
+*.src.rpm
+rpmbuild/
+.rpmmacros
+
+# Source tarballs
+*.tar.*
+*.tgz
+*.zip
+
+# Build directories
+BUILD/
+BUILDROOT/
+RPMS/
+SRPMS/
+SOURCES/
+SPECS/
+
+# Mock build artifacts
+*.log
+results_*/
+
+# COPR configuration (contains sensitive data)
+.config/copr
+
+# Editor files
+*~
+*.swp
+*.swo
+.vscode/settings.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
