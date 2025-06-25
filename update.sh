@@ -4,7 +4,7 @@ set -e
 PROJECT="kadmium/bluez-midi"
 PACKAGE="bluez"
 
-./scripts/chroots/verify-project-chroots.sh kadmium/bluez-midi
+./scripts/chroots/verify-project-chroots.sh $PROJECT
 sudo dnf copr enable -y $PROJECT && sudo dnf update
 chroots=$(./scripts/chroots/get-project-copr-chroots.sh $PROJECT)
 
