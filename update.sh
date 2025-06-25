@@ -28,7 +28,7 @@ echo "$fedora_versions" | while read -r version; do
         latest_version=$(./scripts/spec/get-latest-package-version.sh "$version" "$PACKAGE")
         echo "Latest $PACKAGE version for $version: $latest_version"
         # Check if the latest version is newer than the last processed version
-        echo "Checking $PACKAGE version in COPR project $PROJECT_PATH (Fedora $release_ver)..." >&2
+        echo "Checking $PACKAGE version in COPR project $PROJECT..." >&2
         last_processed_version=$(./scripts/spec/get-copr-package-version.sh $PROJECT "$PACKAGE" "$version")
         latest_version=$(./scripts/spec/get-latest-package-version.sh "$version" "$PACKAGE")
         if [ $? -ne 0 ]; then
