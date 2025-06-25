@@ -20,6 +20,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Build docker image
+        run: |
+          docker build -t bluez-midi-copr .
+
       - name: Set up COPR CLI configuration
         run: |
           mkdir -p ~/.config
@@ -34,8 +38,6 @@ jobs:
       - name: Run automation
         if: ${{ !inputs.fedora_version }}
         run: |
-          # Mount COPR config into container and run automation
-          docker build -t bluez-midi-copr .
           docker run --rm \
             -v "$PWD:/workspace" \
             -v "$HOME/.config/copr:/root/.config/copr:ro" \
@@ -43,3 +45,7 @@ jobs:
             -e COPR_OWNER="${{ env.COPR_OWNER }}" \
             bluez-midi-copr \
             ./update.sh
+
+      - name: Delete COPR config
+        run: |
+          rm -rf ~/.config/copr
